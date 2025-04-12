@@ -228,6 +228,18 @@ BLYNK_WRITE(STEPPER_VPIN) {
   stepperState = direction;
 }
 
+void checkAlert(double temp, double humid, double waterLevel) {
+  if ((temp > 30 || humid > 80 || waterLevel < 20) && !buzzerActive) {
+    buzzerActive = true;
+    digitalWrite(BUZZER_PIN, 1);
+    Blynk.virtualWrite(BUZZER_VPIN, 1);
+    delay(5000);
+    buzzerActive = false;
+    digitalWrite(BUZZER_PIN, 0);
+    Blynk.virtualWrite(BUZZER_VPIN, 0);
+  }
+}
+
 // Function to send data to Blynk
 void sendSensorData() {
   double temp = dht.readTemperature();
@@ -239,6 +251,9 @@ void sendSensorData() {
   Blynk.virtualWrite(HUMID_VPIN, humid);
   Blynk.virtualWrite(LIGHT_VPIN, lightIntensity);
   Blynk.virtualWrite(WATER_VPIN, waterLevel);
+
+  // Check alert
+  checkAlert(temp, humid, waterLevel);
 }
 
 // Led widget indicate connection status
